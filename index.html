@@ -79,7 +79,8 @@
 
         const mockPaymentDetails = {
             yape: { name: "Yape", holder: "Emanuel Flores", account_number: "967 212 987", label: "Numero de Cuenta" },
-            bcp: { name: "BCP", holder: "Emanuel Flores", account_number: "25511017914042", label: "Numero de Cuenta" }
+            bcp: { name: "BCP", holder: "Emanuel Flores", account_number: "25511017914042", label: "Numero de Cuenta" },
+            interbancaria: { name: "Interbacaria", holder: "Emanuel Flores", account_number: "00225511101791404287", label: "Numero de Cuenta" }
         };
 
         const PaymentForm = ({ selectedMatch, paymentMethod, setPaymentMethod, payerName, setPayerName, handleGenerateCode }) => (
@@ -106,6 +107,7 @@
                     <Select value={paymentMethod} label="Entidad de pago" onChange={(e) => setPaymentMethod(e.target.value)} MenuProps={{ disableScrollLock: true }}>
                         <MenuItem value="yape">Cuenta yape</MenuItem>
                         <MenuItem value="bcp">Cuenta bcp</MenuItem>
+                        <MenuItem value="interbancaria">Cuenta interbancaria</MenuItem>
                     </Select>
                 </FormControl>
                 {paymentMethod && (
