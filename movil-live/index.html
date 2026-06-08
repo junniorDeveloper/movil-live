@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>movil-live</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/@mui/material@5.15.0/umd/material-ui.development.js" crossorigin></script>
+
+</head>
+</head>
+
+<body>
+
+    <div style="background:#fff;">
+        <div
+            style="width:100%; max-width:1200px; margin: 0 auto; border-bottom: 1px solid #e0e0e0; background:#fff; padding: 0 0px; height: 56px; display:flex; align-items:center;">
+            <div
+                style="display:flex; align-items:center; gap:8px; font-family:Roboto,sans-serif; font-size:16px; font-weight:500; padding: 0 12px;">
+                <span class="material-icons" style="color:#1976d2;">wifi_tethering</span>
+                Movil Live
+            </div>
+        </div>
+    </div>
+
+    <!-- HERO -->
+    <div style="background:#fff;">
+        <div style="position:relative; overflow:hidden; height:260px; max-width:1200px; margin:0 auto;">
+
+            <video autoplay muted loop playsinline
+                style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:0;">
+                <source src="https://assets.mixkit.co/videos/30312/30312-720.mp4" type="video/mp4">
+            </video>
+
+            <div
+                style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.62); z-index:1;">
+            </div>
+
+            <div
+                style="position:relative; z-index:2; height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; max-width:1200px; margin:0 auto; padding:0 16px; box-sizing:border-box;">
+
+                <div
+                    style="display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,0.15); color:#fff; border:1px solid rgba(255,255,255,0.3); font-size:12px; font-weight:500; padding:4px 12px; border-radius:20px; margin-bottom:14px; font-family:Roboto,sans-serif;">
+                    <span class="material-icons" style="font-size:14px;">wifi_tethering</span>
+                    Transmisión en vivo
+                </div>
+
+                <div
+                    style="font-family:Roboto,sans-serif; font-size:32px; font-weight:300; color:#fff; line-height:1.2; margin-bottom:10px;">
+                    Mira el partido <span style="font-weight:500; color:#64b5f6;">en vivo</span>
+                </div>
+
+                <div
+                    style="font-family:Roboto,sans-serif; font-size:16px; color:rgba(255, 255, 255, 0.75); line-height:1.6; max-width:420px;">
+                    Accede a las mejores transmisiónes desde tu dispositivo y disfruta de contenidos sin interrupciones.
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const {
+            Container, Grid, Card, CardContent, Typography, Box, Tabs, Tab,
+            TextField, Button, MenuItem, FormControl, InputLabel, Select,
+            Snackbar, Alert, Divider, Chip, useMediaQuery, Radio, useTheme, Skeleton
+        } = MaterialUI;
+
+        const API_URL = "/.netlify/functions/matches";
+
+        const mockPaymentDetails = {
+            yape: { name: "Yape", holder: "Emanuel Flores", account_number: "967 212 987", label: "Numero de Cuenta" },
+            bcp: { name: "BCP", holder: "Emanuel Flores", account_number: "25511017914042", label: "Numero de Cuenta" }
+        };
+
+        const PaymentForm = ({ selectedMatch, paymentMethod, setPaymentMethod, payerName, setPayerName, handleGenerateCode }) => (
+            <Box>
+                <Grid item md={6} sx={{ mb: 2 }}>
+                    <Typography variant="subtitle2" color="textSecondary" gutterBottom>Partido seleccionado</Typography>
+                </Grid>
+                <Card sx={{ mb: 4, p: 1.5, border: '1px solid #D1D1D1' }}>
+                    <Typography variant="body1" sx={{ fontSize: '14px', fontWeight: '400' }}>
+                        {selectedMatch ? `${selectedMatch.home_team} vs ${selectedMatch.away_team}` : "Seleccione un partido"}
+                    </Typography>
+                    <Divider sx={{ my: 1 }} />
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Typography variant="body1" sx={{ fontSize: '14px', fontWeight: '400' }}>{selectedMatch?.date} • {selectedMatch?.time}</Typography>
+                        <Typography variant="body1" sx={{ fontSize: '14px', fontWeight: '400' }}>{selectedMatch?.price}</Typography>
+                    </Box>
+                </Card>
+
+                <Grid item md={6} sx={{ mb: 2 }}>
+                    <Typography variant="subtitle2" color="textSecondary" gutterBottom>Formas de pago</Typography>
+                </Grid>
+                <FormControl fullWidth sx={{ mb: 2 }}>
+                    <InputLabel>Entidad de pago</InputLabel>
+                    <Select value={paymentMethod} label="Entidad de pago" onChange={(e) => setPaymentMethod(e.target.value)} MenuProps={{ disableScrollLock: true }}>
+                        <MenuItem value="yape">Cuenta yape</MenuItem>
+                        <MenuItem value="bcp">Cuenta bcp</MenuItem>
+                    </Select>
+                </FormControl>
+                {paymentMethod && (
+                    <Card sx={{ mb: 2, p: 1.5, border: '1px solid #D1D1D1' }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Typography variant="body1" sx={{ fontSize: '14px', fontWeight: '400' }}>Titular</Typography><Typography variant="body1" sx={{ fontSize: '14px', fontWeight: '400' }}>{mockPaymentDetails[paymentMethod].holder}</Typography>
+                        </Box>
+                        <Divider sx={{ my: 1 }} />
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Typography variant="body1" sx={{ fontSize: '14px', fontWeight: '400' }}>{mockPaymentDetails[paymentMethod].label}</Typography><Typography variant="body1" sx={{ fontSize: '14px', fontWeight: '400' }}>{mockPaymentDetails[paymentMethod].account_number}</Typography>
+                        </Box>
+                    </Card>
+                )}
+                <TextField fullWidth label="Quién realizará el pago *" value={payerName} onChange={(e) => setPayerName(e.target.value)} sx={{ mb: 2 }} />
+                <Button variant="contained" fullWidth size="large" onClick={handleGenerateCode} sx={{ mb: 2 }}>
+                    SOLICITAR TRANSMISION
+                </Button>
+            </Box>
+        );
+
+        function App() {
+            const theme = useTheme();
+            const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+            const [selectedMatch, setSelectedMatch] = React.useState(null);
+            const [matches, setMatches] = React.useState([]);
+            const [loadingMatches, setLoadingMatches] = React.useState(true);
+
+            React.useEffect(() => {
+                fetch(API_URL)
+                    .then(res => res.json())
+                    .then(data => { setMatches(data); setLoadingMatches(false); })
+                    .catch(() => setLoadingMatches(false));
+            }, []);
+
+            const [tabValue, setTabValue] = React.useState(0); // 0: Lista, 1: Pago
+
+            const [paymentMethod, setPaymentMethod] = React.useState('');
+            const [payerName, setPayerName] = React.useState('');
+            const [snackbar, setSnackbar] = React.useState({ open: false, message: '', severity: 'info' });
+
+            const handleSelectMatch = (match) => {
+                if (match.status === 'inactive') return;
+                setSelectedMatch(match);
+                setPaymentMethod('');
+                setPayerName('');
+                if (isMobile) setTabValue(1);
+            };
+
+            const handleGenerateCode = (e) => {
+                e.preventDefault();
+                if (!paymentMethod || !payerName.trim()) {
+                    setSnackbar({ open: true, message: 'Complete el formulario.', severity: 'warning' });
+                    return;
+                }
+
+                const detallesPago = mockPaymentDetails[paymentMethod];
+
+                const numeroTelefono = "51967212987";
+                const textoMensaje = `*SOLICITUD DE TRANSMICION LIVE*\n\n` +
+
+                    `*DATOS DEL CLIENTE*\n` +
+                    `• ${payerName}\n\n` +
+
+                    `*DETALLES DEL PAGO*\n` +
+                    `• Entidad: ${paymentMethod}\n` +
+                    `• Titular: ${detallesPago.holder}\n` +
+                    `• Cuenta: ${detallesPago.account_number}\n` +
+                    `• Monto: ${selectedMatch.price}\n\n` +
+
+                    `*DATOS DEL EVENTO*\n` +
+                    `• ${selectedMatch.home_team} vs ${selectedMatch.away_team}\n` +
+                    `• ${selectedMatch.date} • ${selectedMatch.time}\n\n` +
+
+                    `*PASOS QUE SEGUIRE*\n` +
+                    `• Realizar el pago\n` +
+                    `• Compartir evidencia del pago\n` +
+                    `• Solicitar Link del live`;
+
+                const whatsappUrl = `https://api.whatsapp.com/send?phone=${numeroTelefono}&text=${encodeURIComponent(textoMensaje)}`;
+                window.open(whatsappUrl, '_blank');
+            };
+
+            const MatchList = () => (
+                <Box>
+
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pb: 4 }}>
+
+                        {loadingMatches ? (
+                            [1, 2].map((i) => (
+                                <Card key={i} sx={{ border: '1px solid #e0e0e0' }}>
+                                    <CardContent>
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                                            <Skeleton variant="text" width={100} />
+                                            <Skeleton variant="rounded" width={80} height={24} />
+                                        </Box>
+                                        <Skeleton variant="text" width="60%" height={28} />
+                                        <Divider sx={{ my: 1 }} />
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                            <Skeleton variant="text" width={140} />
+                                            <Skeleton variant="text" width={60} />
+                                        </Box>
+                                    </CardContent>
+                                </Card>
+                            ))
+                        ) : (
+                            matches.map((match, index) => {
+                                const isInactive = match.status === 'inactive';
+                                const isSelected = selectedMatch?.id_code === match.id_code;
+                                return (
+                                    <Card
+                                        key={index}
+                                        onClick={() => !isInactive && handleSelectMatch(match)}
+                                        sx={{
+                                            opacity: isInactive ? 0.5 : 1,
+                                            cursor: isInactive ? 'not-allowed' : 'pointer',
+                                            border: '1px solid #e0e0e0',
+                                            boxShadow: isSelected ? 3 : 1,
+                                            backgroundColor: isSelected ? '#f9f9f9' : '#fff',
+                                            transition: '0.2s all ease-in-out',
+                                            '&:hover': {
+                                                boxShadow: isInactive ? 1 : 3
+                                            }
+                                        }}
+                                    >
+                                        <CardContent>
+                                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                                                <Typography variant="caption" sx={{ fontWeight: '400', }}>
+                                                    {match.championship}
+                                                </Typography>
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                    <Chip
+                                                        label={isInactive ? "Próximamente" : "Disponible"}
+                                                        color={isInactive ? "default" : "primary"}
+                                                        size="small"
+                                                        variant="outlined"
+                                                    />
+                                                    <Radio
+                                                        checked={isSelected}
+                                                        disabled={isInactive}
+                                                        value={match.id_code}
+                                                        name="match-selection"
+                                                        size="small"
+                                                        sx={{
+                                                            padding: 0,
+                                                            color: '#b8b8b8',
+                                                            '&.Mui-checked': {
+                                                                color: '#2196f3',
+                                                            },
+                                                        }}
+                                                    />
+                                                </Box>
+                                            </Box>
+
+                                            <Typography variant="h6" sx={{ fontSize: '16px', fontWeight: 400 }}>
+                                                {match.home_team} vs {match.away_team}
+                                            </Typography>
+
+                                            <Divider sx={{ my: 1 }} />
+
+                                            <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <Typography variant="body2" sx={{ fontSize: '14px', fontWeight: '400' }}>
+                                                    {match.date} • {match.time}
+                                                </Typography>
+                                                <Typography variant="body2" sx={{ fontSize: '14px', fontWeight: '400' }}>
+                                                    {match.price}
+                                                </Typography>
+                                            </Box>
+                                        </CardContent>
+                                    </Card>
+                                );
+                            })
+                        )}
+                    </Box>
+                </Box>
+            );
+
+            return (
+                <Container maxWidth="lg" sx={{ mt: 4, px: { xs: 2, md: 3 } }}>
+                    {/* TABS PARA MÓVIL */}
+                    <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3, display: { xs: 'block', md: 'none', } }}>
+                        <Tabs
+                            value={tabValue}
+                            onChange={(e, v) => {
+                                if (v !== 0 && !selectedMatch) {
+                                    setSnackbar({ open: true, message: 'Selecciona un partido', severity: 'warning' });
+                                } else {
+                                    setTabValue(v);
+                                }
+                            }}
+                            variant="fullWidth"
+                        >
+                            <Tab label="Partidos" />
+                            <Tab label="Pago" />
+                        </Tabs>
+                    </Box>
+
+
+
+                    {/* Botón actualizar solo en desktop, fuera del grid */}
+                    {!isMobile && (
+                        <Box sx={{ display: 'flex', justifyContent: 'flex-start', mb: 1 }}>
+                            <Button
+                                size="small"
+                                variant="text"
+                                startIcon={<span className="material-icons" style={{ fontSize: 18 }}>refresh</span>}
+                                onClick={() => {
+                                    setLoadingMatches(true);
+                                    fetch(API_URL)
+                                        .then(res => res.json())
+                                        .then(data => { setMatches(data); setLoadingMatches(false); })
+                                        .catch(() => setLoadingMatches(false));
+                                }}
+                                sx={{ textTransform: 'none', color: 'text.secondary' }}
+                            >
+                                Actualizar lista
+                            </Button>
+                        </Box>
+                    )}
+
+                    <Grid container spacing={3} sx={{ alignItems: 'flex-start' }}>
+                        {isMobile ? (
+                            <Grid item xs={12}>
+                                {tabValue === 0 && (
+                                    <Box>
+                                        <Box sx={{ display: 'flex', justifyContent: 'flex-start', mb: 1 }}>
+                                            <Button
+                                                size="small"
+                                                variant="text"
+                                                startIcon={<span className="material-icons" style={{ fontSize: 18 }}>refresh</span>}
+                                                onClick={() => {
+                                                    setLoadingMatches(true);
+                                                    fetch(API_URL)
+                                                        .then(res => res.json())
+                                                        .then(data => { setMatches(data); setLoadingMatches(false); })
+                                                        .catch(() => setLoadingMatches(false));
+                                                }}
+                                                sx={{ textTransform: 'none', color: 'text.secondary' }}
+                                            >
+                                                Actualizar lista
+                                            </Button>
+                                        </Box>
+                                        <MatchList />
+                                    </Box>
+                                )}
+                                {tabValue === 1 && (
+                                    <PaymentForm
+                                        selectedMatch={selectedMatch}
+                                        paymentMethod={paymentMethod}
+                                        setPaymentMethod={setPaymentMethod}
+                                        payerName={payerName}
+                                        setPayerName={setPayerName}
+                                        handleGenerateCode={handleGenerateCode}
+                                    />
+                                )}
+                            </Grid>
+                        ) : (
+                            <React.Fragment>
+                                <Grid item md={6}>
+                                    <MatchList />
+                                </Grid>
+                                <Grid item md={6}>
+                                    <Card sx={{ border: '1px solid #D1D1D1' }}>
+                                        <Box sx={{ p: 3 }}>
+                                            {!selectedMatch ? (
+                                                <Typography color="textSecondary" align="center">Seleccione un partido para continuar</Typography>
+                                            ) : (
+                                                <PaymentForm
+                                                    selectedMatch={selectedMatch}
+                                                    paymentMethod={paymentMethod}
+                                                    setPaymentMethod={setPaymentMethod}
+                                                    payerName={payerName}
+                                                    setPayerName={setPayerName}
+                                                    handleGenerateCode={handleGenerateCode}
+                                                />
+                                            )}
+                                        </Box>
+                                    </Card>
+                                </Grid>
+                            </React.Fragment>
+                        )}
+                    </Grid>
+
+                    <Snackbar
+                        open={snackbar.open}
+                        autoHideDuration={4000}
+                        onClose={() => setSnackbar({ ...snackbar, open: false })}
+                        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                    >
+                        <Alert severity={snackbar.severity} variant="filled">{snackbar.message}</Alert>
+                    </Snackbar>
+                </Container>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+
+</html>
